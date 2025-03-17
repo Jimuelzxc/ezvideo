@@ -1,7 +1,7 @@
 
 # Create Title
-from agents.title import generateTitle
-selected_title = generateTitle()
+from agents.title import generate_title_client
+selected_title = generate_title_client()
 
 # Create Script
 from agents.script import generateScript
