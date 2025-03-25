@@ -3,3 +3,4 @@ youtube_upload/
 server.py
 ezvideo-ui/node_modules
 gemini-podcast/
+.gitignore
