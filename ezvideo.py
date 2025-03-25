@@ -4,8 +4,8 @@ from agents.title import generate_title_client
 selected_title = generate_title_client()
 
 # Create Script
-from agents.script import generateScript
-text = generateScript(selected_title)
+from agents.script import generate_script
+text = generate_script(selected_title)
 
 # Script to audio
 from agents.speech import generateAudio

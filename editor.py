@@ -12,6 +12,7 @@ def transcribe_audio(audio_file):
     model = whisper.load_model("base")
     result = model.transcribe(audio_file, word_timestamps=True)
     return result["segments"]
+    print(result["segments"])
 
 
 def create_srt_from_words(segments, words_per_subtitle, srt_filename):
@@ -97,6 +98,7 @@ def generateVideo(audioPath, title):
     title = title.lower()
     title = title.replace(" ", "_")
     title = re.sub(r'[^\w-]', '', title)     
+    
     subtitle_path = f"./raw/subtitles/{title}.srt"  
     video_path = f"./raw/videos/temp_video_{title}.mp4"
     final_video_path = f"./final/{title}.mp4"  
