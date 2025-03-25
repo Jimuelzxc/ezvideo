@@ -1,19 +1,4 @@
-import whisper
-from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
-from moviepy.config import change_settings
-change_settings({"IMAGEMAGICK_BINARY": r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"})
-import subprocess
-import os
-import shutil
-from pathlib import Path
-
-# Step 1: Transcribe audio with Whisper
-def transcribe_audio(audio_file):
-    model = whisper.load_model("base")
-    result = model.transcribe(audio_file, word_timestamps=True)
-    return result["segments"]
-    print(result["segments"])
-
+"""
 
 def create_srt_from_words(segments, words_per_subtitle, srt_filename):
     # Ensure the directory exists before writing the file
@@ -52,6 +37,55 @@ def create_srt_from_words(segments, words_per_subtitle, srt_filename):
         f.write(srt_content)
     return srt_filename   
     
+
+
+"""
+
+import whisper
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
+from moviepy.config import change_settings
+change_settings({"IMAGEMAGICK_BINARY": r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"})
+import subprocess
+import os
+import shutil
+from pathlib import Path
+
+# Step 1: Transcribe audio with Whisper
+def transcribe_audio(audio_file):
+    model = whisper.load_model("base")
+    result = model.transcribe(audio_file, word_timestamps=True)
+    return result["segments"]
+    print(result["segments"])
+
+    
+# Step 2: Create SRT from segments without splitting into fixed word counts
+def create_srt_from_segments(segments, srt_filename):
+    # Ensure the directory exists before writing the file
+    os.makedirs(os.path.dirname(srt_filename), exist_ok=True)
+    
+    srt_content = ""
+    
+    for index, segment in enumerate(segments, start=1):
+        start_time = segment["start"]
+        end_time = segment["end"]
+        # Use the complete text of the segment
+        text = segment["text"].strip()
+        
+        # Format timestamps for SRT (HH:MM:SS,mmm)
+        start_srt = f"{int(start_time // 3600):02d}:{int((start_time % 3600) // 60):02d}:{int(start_time % 60):02d},{int((start_time % 1) * 1000):03d}"
+        end_srt = f"{int(end_time // 3600):02d}:{int((end_time % 3600) // 60):02d}:{int(end_time % 60):02d},{int((end_time % 1) * 1000):03d}"
+        
+        # Add subtitle entry to SRT content
+        srt_content += f"{index}\n{start_srt} --> {end_srt}\n{text}\n\n"
+    
+    # Write to SRT file
+    with open(srt_filename, "w", encoding="utf-8") as f:
+        f.write(srt_content)
+    return srt_filename
+
+
+
+   
 
 def create_video_with_images_and_audio(images, audio_file, output_file):
     audio = AudioFileClip(audio_file)
@@ -105,7 +139,7 @@ def generateVideo(audioPath, title):
 
     images = [str(p) for p in sorted(Path('./raw/images').glob('*.png'), key=lambda p: int(p.stem))]
     segments = transcribe_audio(audioPath)
-    srt_file = create_srt_from_words(segments, 6, subtitle_path)
+    srt_file = create_srt_from_segments(segments, subtitle_path)
     video_file = create_video_with_images_and_audio(images, audioPath, video_path)
     final_output = burn_subtitles_ffmpeg(video_file, srt_file, final_video_path)
     return final_output
